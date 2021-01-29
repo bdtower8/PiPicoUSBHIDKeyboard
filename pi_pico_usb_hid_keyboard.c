@@ -42,12 +42,34 @@ struct keyCombo{
     uint8_t m_keycode;
 };
 
-#define numGPIO 4
-struct keyCombo buttons[numGPIO] = {{ 0,     HID_KEY_B},
-                                    { 2,     HID_KEY_SHIFT_LEFT},
-                                    { 16,    HID_KEY_C},
-                                    { 18,    HID_KEY_D} };
-
+#define maxKeypress 6
+#define numGPIO 26
+struct keyCombo buttons[numGPIO] = {{ 0,    HID_KEY_A},
+                                    { 1,    HID_KEY_B},
+                                    { 2,    HID_KEY_C},
+                                    { 3,    HID_KEY_D},
+                                    { 4,    HID_KEY_E},
+                                    { 5,    HID_KEY_F},
+                                    { 6,    HID_KEY_G},
+                                    { 7,    HID_KEY_H},
+                                    { 8,    HID_KEY_I},
+                                    { 9,    HID_KEY_J},
+                                    { 10,   HID_KEY_K},
+                                    { 11,   HID_KEY_L},
+                                    { 12,   HID_KEY_M},
+                                    { 13,   HID_KEY_N},
+                                    { 14,   HID_KEY_O},
+                                    { 15,   HID_KEY_P}, // TODO - investigate note on adafruit site, replace with 25 and remove LED otherwise
+                                    { 16,   HID_KEY_Q},
+                                    { 17,   HID_KEY_R},
+                                    { 18,   HID_KEY_S},
+                                    { 19,   HID_KEY_T},
+                                    { 20,   HID_KEY_U},
+                                    { 21,   HID_KEY_V},
+                                    { 22,   HID_KEY_W},
+                                    { 26,   HID_KEY_X},
+                                    { 27,   HID_KEY_Y},
+                                    { 28,   HID_KEY_Z} };
 
 //--------------------------------------------------------------------+
 // PROTOTYPES
@@ -68,9 +90,10 @@ int main() {
     // initialize tiny usb
     tusb_init();
 
-    // enable pullup resistors for all input, button will pull gpio to ground
+    // enable gpio/pullup resistors for all input, button will pull input to ground
     for(int i = 0;i < numGPIO;++i)
     {
+        gpio_set_function(buttons[i].m_gpio, GPIO_FUNC_PIO0);
         gpio_pull_up(buttons[i].m_gpio);
     }
 
@@ -90,7 +113,6 @@ int main() {
     return 0;
 }
 
-
 //--------------------------------------------------------------------+
 // INPUT TASK
 //--------------------------------------------------------------------+
@@ -99,8 +121,7 @@ void input_task(void)
 {
     // cap at 6 simultaneous keys
     // TODO - determine actual cap
-    const int maxKeys = 6;
-    uint8_t keycode[maxKeys] = {0};
+    uint8_t keycode[maxKeypress] = {0};
     int keycodeIndex = 0;
 
     // check if any keys are depressed, stack as necessary
@@ -109,7 +130,7 @@ void input_task(void)
         if(!gpio_get(buttons[i].m_gpio)) {
             keycode[keycodeIndex++] = buttons[i].m_keycode;
 
-            if(keycodeIndex >= maxKeys) {
+            if(keycodeIndex >= maxKeypress) {
                 break;
             }
         }
